@@ -1,19 +1,26 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
+import logging
+import traceback
 import joblib
 import numpy as np
-import pandas as pd  # Assurez-vous que pandas est installé
-
+import pandas as pd
 
 from fastapi.middleware.cors import CORSMiddleware
 
-
+# Configurez le logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("FastAPI")
 
 # Charger les modèles au démarrage de l'application pour améliorer les performances
-model_e = joblib.load("Modele_score_E.joblib")
-model_s = joblib.load("Modele_score_S.joblib")
-model_g = joblib.load("Modele_score_G.joblib")
-model_overall = joblib.load("esg_Line_regression_model.joblib")
+try:
+    model_e = joblib.load("Modele_score_E.joblib")
+    model_s = joblib.load("Modele_score_S.joblib")
+    model_g = joblib.load("Modele_score_G.joblib")
+    model_overall = joblib.load("esg_Line_regression_model.joblib")
+except Exception as load_err:
+    logger.error(f"Erreur lors du chargement des modèles : {load_err}")
+    raise
 
 
 # print(model_e.feature_names_in_)
@@ -89,6 +96,8 @@ app.add_middleware(
 @app.post("/predict")
 def predict(data: dict):
     try:
+        logger.info(f"Requête reçue : {await request.json()}")
+        
         # Mappage explicite des noms des champs pour chaque modèle
         feature_map_e = {
             "secteur": "secteur",
@@ -177,4 +186,6 @@ def predict(data: dict):
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Erreur dans la prédiction : {e}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Erreur serveur : {str(e)}")
