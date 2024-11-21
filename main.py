@@ -4,6 +4,18 @@ import joblib
 import numpy as np
 import pandas as pd  # Assurez-vous que pandas est installé
 
+
+from fastapi.middleware.cors import CORSMiddleware
+
+# Ajoutez ce middleware après l'initialisation de l'application FastAPI
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Autoriser toutes les origines, à limiter si nécessaire
+    allow_credentials=True,
+    allow_methods=["*"],  # Autoriser toutes les méthodes HTTP
+    allow_headers=["*"],  # Autoriser tous les en-têtes
+)
+
 # Charger les modèles au démarrage de l'application pour améliorer les performances
 model_e = joblib.load("Modele_score_E.joblib")
 model_s = joblib.load("Modele_score_S.joblib")
