@@ -94,9 +94,10 @@ app.add_middleware(
 
 
 @app.post("/predict")
-async def predict(data: dict):
+async def predict(request: Request):  # Ajoutez le paramètre 'request'
     try:
         logger.info(f"Requête reçue : {await request.json()}")
+        data = await request.json()
         
         # Mappage explicite des noms des champs pour chaque modèle
         feature_map_e = {
