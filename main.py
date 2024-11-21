@@ -94,7 +94,7 @@ app.add_middleware(
 
 
 @app.post("/predict")
-def predict(data: dict):
+def async predict(data: dict):
     try:
         logger.info(f"Requête reçue : {await request.json()}")
         
